@@ -92,3 +92,4 @@ Only after the complete data QA report and `outputs/feasibility.md` justify PASS
 - Latest check: 37 tests passed; compileall passed; source validation passed; gate and dataset geography QA passed (383/100/1,169); approved pipeline exited 0. See `FINAL_AUDIT.md` for details.
 - Refreshed presentation-inclusive archive contains 84 members, passes ZIP integrity, and has all member hashes matching the workspace; kept out of the GitHub staging set.
 - Verified 69 eligible local files copied byte-for-byte into the temporary clone for review. Commit/push status is recorded after that phase completes.
+- Clean-clone dependency installation identified the yanked Matplotlib 3.9.1 Windows release. The pin is updated to 3.9.1.post1 (a compatible Windows x64 wheel was verified); this fixes packaging only. Final post-fix clean-clone test/build status is recorded after rerunning it.

@@ -7,6 +7,7 @@
 - Improved `.gitignore` to retain processed panel, QA, tables, figures, docs and presentation assets while excluding raw source payloads, archives, caches, secrets and environments. The raw manifest stays included with hashes.
 - Reran validation: pytest 37 passed; compileall exit 0; 13 active cached sources validated; feasibility gate accepted; dataset check confirmed 383 training MSAs, 100 evaluation candidates and 1,169 county links; approved pipeline regenerated rankings successfully. White-space K=5 remains +838 versus -8 for Population/Ridge.
 - Refreshed `dist/Restaurant_Market_Expansion_Submission_Presentation_2026-11-26.zip` with reports and screenshots; the 84-member archive passed integrity and all member-hash checks. Archive files are excluded from GitHub.
+- The first isolated clone install exposed the yanked Windows-incompatible Matplotlib 3.9.1 pin. PyPI's official release record explains the Windows wheel removal. Changed `requirements.txt` to `matplotlib==3.9.1.post1` and verified that its CPython 3.11 Windows x64 wheel is downloadable. This is packaging-only; methodology and numeric outputs are unchanged. Final clean-clone verification follows the update push.
 - Copied 69 eligible local files to the temporary clone and verified each SHA-256 against the working project. Staged diff review is in progress; the original project directory and the GitHub remote have not been modified by this reconciliation step.
 
 ## 2026-11-26 — Final Git recovery, cleanup, visual assets, and post-cleanup reproduction
