@@ -1,0 +1,12 @@
+field,definition,source,unit_or_format
+metro_id,"Five-digit CBSA code, retained as text to preserve leading zeroes.",OMB Bulletin 17-01 MSA assignments,identifier
+metro_name,Official 2017 metropolitan statistical area title.,OMB Bulletin 17-01 MSA assignments,text
+decision_cutoff,Simulated information cutoff for the observation.,Approved design,date
+target_start,CBP week-containing-March-12 anchor for the first target year.,CBP,date
+target_end,CBP week-containing-March-12 anchor for the last target year.,CBP,date
+target_release_date,Public release date of the final CBP source used in the target.,Census CBP release record,date
+net_additions,Later limited-service CBP EST minus earlier EST; may be negative.,CBP; NAICS vintage mapped by source year,establishments
+population,County PEP population summed to the fixed OMB 2017 MSA geography.,Census PEP county estimates,people
+current_establishments,"Limited-service restaurants at the feature vintage, aggregated to fixed MSA geography.",CBP EST; NAICS vintage mapped by source year,establishments
+restaurants_per_10k,"Current establishments divided by population and multiplied by 10,000.",Derived from CBP and PEP,"establishments per 10,000 people"
+national_establishments_per_capita,US county-only CBP establishments divided by US county PEP population; state summaries excluded.,Derived from CBP and PEP,establishments per person

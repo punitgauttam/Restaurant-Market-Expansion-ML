@@ -1,0 +1,8 @@
+metric,definition
+selected_net_additions,Sum of observed net establishment additions among the method's top K; may be negative.
+hindsight_best_net_additions,Sum for the K metros with the largest observed outcomes; evaluation reference only.
+regret,Hindsight-best total minus selected total for the same K.
+overlap_actual_top_k,Count of selected metros also in the actual outcome top K; ties break by metro ID.
+precision_at_k,Overlap count divided by K (or available candidate count if smaller).
+ndcg_at_k_nonnegative_linear_gain,"NDCG using relevance=max(0, net_additions), linear gain, and logarithmic rank discounts; NaN when ideal gain is zero."
+spearman_rho,Spearman correlation between method score order and observed net additions across the full candidate universe.

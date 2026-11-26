@@ -1,190 +1,91 @@
-# Prospect Selection: Which US Metros Should a Fast-Food Chain Prioritise?
+# Restaurant Market Expansion: Reproducible Analysis
 
-**Course:** Machine Learning for Business Analytics — Plaksha MS-AI, Monsoon 2026  
-**Weight:** 35% of course grade  
-**Presentations:** 26–27 November 2026 (12 minutes + 6 minutes Q&A; every team member presents)  
-**Final submission:** 1 December 2026, 11:59 pm — dataset, reproducible Python script, brief run instructions, and public data sources.
+This repository contains the approved retrospective analysis of US limited-service restaurant market opportunity. The final comparison ranks the 100 largest eligible US metropolitan areas at the 2018-02-01 cutoff using population, a white-space score, and Ridge regression. The held-out target is industry-wide establishment net additions from CBP 2018 to CBP 2021.
 
-> **Status: PROJECT PLAN — not an implemented or validated analysis.** No dataset download, geographic harmonisation, model result, or source availability is claimed to have been verified. Complete the feasibility gate before implementation. The professor's project brief is authoritative; this README is the team's proposed implementation.
+**Current result:** white-space performed best in the single 2018-2021 evaluation: its top five recorded 838 net additions, compared with -8 for both population and Ridge. See [REPORT.md](REPORT.md) for rankings, metrics, interpretation, and limitations. This outcome is not a chain-level profit or causal estimate.
 
-## 1. Business decision and scope
+## Design
 
-A hypothetical limited-service restaurant chain has resources to **prioritise K = 5 metropolitan markets** out of approximately **100 candidate US metropolitan statistical areas (CBSAs)**. We will also compare **K = 10 and K = 20** as sensitivity checks. The output is an ordered ranking and two competing top-K shortlists for the **same decision situation**.
-
-**Business objective:** identify metropolitan markets that appear to have strong capacity for additional limited-service restaurant establishments. **Observable evaluation proxy:** the **net change in industry-wide limited-service restaurant establishment counts** over a later period. This is *not* the chain's expected profit, store survival, market share, or a causal estimate of what would happen if it entered. A metro with high industry growth is not necessarily the best investment for a particular chain.
-
-**Proposed retrospective setup:** rank eligible markets at a historical decision cutoff associated with 2014 and evaluate against 2014–2019 growth. **The exact information cutoff must be fixed after checking publication/release dates.** If necessary, move the decision cutoff or use older data; document the change before fitting models. Do not describe an annual data vintage as information available on 1 January of that year without proof.
-
-**Candidate rule:** use the 100 largest eligible CBSAs by a *pre-outcome, available-at-cutoff* population estimate under a documented fixed geographic vintage. Establish the universe independently of 2014–2019 outcomes. Record exclusions, ties, missing data, and any change in sample size. Use the same candidates and target definition for every method. Existing restaurants are allowed: the decision is **market expansion/prioritisation, not first-ever market entry**.
-
-## 2. Questions the project must answer
-
-1. What exactly is the constrained business decision, and what does one dataset row represent?
-2. Can public data support a historical, reproducible ranking with a genuine observable later outcome?
-3. Do the two approaches select different markets, and *why*?
-4. How do they compare with a meaningful, simple population baseline on held-out evidence?
-5. What do the results establish, and what can they **not** establish about business success?
-
-A complicated model is **not** a grading objective. The professor grades the coherence of problem, data, method, evaluation and conclusions.
-
-## 3. Mandatory feasibility gate — before modelling
-
-The agent must create a documented `outputs/feasibility.md` and establish:
-
-- Official source URLs and successful downloads/API access for the required CBP and ACS vintages, plus a county-to-CBSA mapping.
-- Actual industry classification codes and comparability across **2009, 2014 and 2019** (including the 2007-to-2012 NAICS revision). Do not assume a code is identical across vintages.
-- Which years' features were **publicly released by each simulated decision cutoff**. Track reference period **and** release date for each variable.
-- County/CBSA boundary vintage, county changes, aggregation rules and geographic coverage.
-- Suppressed/missing establishment counts, zero versus suppressed distinction, sample attrition and whether the outcome is credible for enough metros.
-- A usable **earlier training decision** with pre-decision features and later observed outcome, plus an independent later evaluation decision. Verify both before promising Ridge training.
-
-**Gate outcome:** `PASS`, `PASS WITH DOCUMENTED LIMITATIONS`, or `BLOCKED`. If blocked, explain the specific issue and propose the smallest defensible adjustment; **do not silently switch the problem, fabricate observations, or proceed as though data were validated**. Ask the user before a substantive change of geography, category, target or time windows.
-
-## 4. Proposed public data
-
-| Layer | Candidate source | Intended use | Verification required |
+| Stage | Cutoff | Features | Outcome |
 |---|---|---|---|
-| Restaurant establishments | US Census Bureau **County Business Patterns (CBP)**, 2009/2014/2019 | Limited-service restaurant counts, prior growth, later outcome | NAICS harmonisation, suppression, county coverage, release dates |
-| Population and demographics | US Census Bureau **American Community Survey (ACS) 5-year**; candidate vintages 2005–2009 and 2010–2014, plus earlier vintages if required | Population, income, age, education, household change | Publication timing, variable definitions, comparability |
-| Geography | Official Census/OMB CBSA delineation and county-to-CBSA crosswalk | Aggregate county observations into a consistent metro universe | Fixed vintage and boundary-change policy |
+| Training | 2010-01-01 | CBP 2007 county restaurants (NAICS 722211); PEP 2008 county population | CBP 2013 minus CBP 2010 establishments |
+| Evaluation | 2018-02-01 | CBP 2015 county restaurants (NAICS 722513); PEP 2016 county population | CBP 2021 MSA minus CBP 2018 MSA establishments |
 
-Official starting points: [Census CBP](https://www.census.gov/programs-surveys/cbp.html), [Census ACS](https://www.census.gov/programs-surveys/acs.html), [Census API](https://api.census.gov/data.html). These are **starting points, not proof that every required extract is accessible**. A Census API key may be useful; confirm whether the chosen endpoints require one. Log exact URLs, query parameters, dates accessed, licensing/terms and checksums where practical in `SOURCES.md`.
+The 2017 OMB Bulletin 17-01 MSA county geography is applied retrospectively. Census List 1 is filtered to metropolitan statistical areas. The historical training sample uses all eligible MSAs; evaluation candidates are chosen separately as the 100 largest by 2016 population. Ridge alpha is fixed at 1.0. The evaluation includes COVID-19 and is one unusual historical regime. Full design and caveats are in `docs/revised_design_proposal.md` and `outputs/feasibility.md`.
 
-**One row:** a `(metro_id, decision_cutoff)` observation with documented pre-cutoff features and a future outcome. Preserve raw source values and a separate cleaned analytical table. Report exclusions and missingness explicitly.
+## Data sources and method
 
-## 5. Ranking methods
+The project uses official US Census County Business Patterns (CBP) establishment counts, Population Estimates Program (PEP) county population files, and the Census/OMB 2017 List 1 county-to-MSA delineation. CBP county and MSA geography reference files support coverage checks. Exact source URLs, reference years, retrieval metadata, file sizes, HTTP status, and SHA-256 hashes are documented in `SOURCES.md` and `data/raw/download_manifest.csv`.
 
-All methods rank the **same eligible metros** for the same cutoff and use only permitted information.
+The business question is which five eligible metropolitan markets should be prioritized under a constrained expansion shortlist. It compares a 2016 population baseline, the approved white-space score (`population × national establishment density − current establishments`), and a Ridge model with fixed alpha 1.0. The outcome is industry-wide limited-service restaurant establishment net additions; it is not chain-specific profit or causal returns. Training uses the 2010-01-01 cutoff and 2010–2013 label; evaluation uses the 2018-02-01 cutoff and 2018–2021 label. All three methods use the same top 100 evaluation candidates, selected by 2016 population.
 
-| Role | Method | Ranking rule |
-|---|---|---|
-| **Simple baseline** | Population | Rank by population known at the cutoff. |
-| **Approach A** | White-space heuristic | `expected_establishments = population × national_establishments_per_capita`; `score = expected_establishments − current_establishments`. Estimate national density using only cutoff-eligible data, with consistent industry/geographic definitions. |
-| **Approach B** | Ridge regression | Predict future **absolute net additions** from cutoff-eligible demographics, restaurant density, prior establishment growth and other justified features; rank by predictions. |
+## Install in a clean environment
 
-**Primary comparison:** Approach A versus Approach B; **benchmark:** population baseline. Ridge is the sole required ML model. Gradient boosting is optional only after the core comparison works, and must not displace the main analysis.
+Use Python 3.11.9. From the project root in PowerShell:
 
-**Training/evaluation design:** the proposed historical training label is establishment change **2009–2014**, and the proposed independent evaluation label is change **2014–2019**. For the *training* row, predictors must have been available at the earlier decision cutoff (not 2014 values). For the *evaluation* row, predictors must have been available at the later decision cutoff (not 2019 values). Exact cutoffs and feature vintages remain **to be verified**. Fit imputation, scaling, feature selection and Ridge tuning only on training-side data; no test-outcome inspection for model selection. If only one earlier period is available, use a prespecified/simple Ridge configuration or training-only validation and state uncertainty.
-
-Do not force the model to predict positive growth: net additions may be negative. Document the white-space score's interpretation and whether the national average includes the candidate metro itself.
-
-## 6. Evaluation and comparison
-
-**Primary outcome:** `count_2019 − count_2014` for the same harmonised metro and industry definition. Negative outcomes are allowed. Evaluate at **K = 5** primarily; K = 10 and 20 are robustness checks.
-
-**Primary decision metrics:**
-
-- **Realised total net additions in selected top K**, reported alongside the population baseline and the hindsight-best K. This is a *proxy* measure, not realised chain benefit.
-- **Regret@K** = hindsight-best total minus the method's selected total (lower is better). Report the raw values; avoid misleading ratios when totals are zero or negative.
-
-**Supporting metrics:** overlap/precision@K against actual top-K metros, NDCG@K **with an explicit treatment of negative gains** (e.g., documented nonnegative relevance transformation), and Spearman rank correlation. Use the same tie-handling policy across methods. Report exact shortlists, overlaps, and rank changes, with concrete feature-based explanations.
-
-**Uncertainty and robustness (only if feasible):** bootstrap metros with a clear resampling unit; random-selection/permutation reference as supplemental context (never the sole baseline); compare absolute additions with growth rate as a *separate* target and discuss denominator effects. A second test window is optional **only if complete earlier features and labels exist**. Do not claim statistically significant superiority without a valid test and sufficient evidence.
-
-**Evaluation integrity:** do not use 2014–2019 labels to select features, tune Ridge, choose metros, change K, select a favorable time period or revise the business target. The hindsight-best list is used **only for evaluation**, never as a feasible historical decision.
-
-## 7. Limitations and interpretation
-
-- Industry-wide establishment growth is a proxy for market opportunity, **not chain-level profit or a proven successful opening**; it also reflects supply, regulation, land availability, competition and development.
-- Counts may be suppressed; NAICS definitions, ACS estimates, CBSA boundaries and publication dates may not align perfectly.
-- One historical test window may reflect a particular economic regime; external validity is limited.
-- Large markets may dominate absolute additions; growth rates favor smaller bases. Report this trade-off rather than declaring one target universally correct.
-- The analysis is observational and does **not** establish causal returns from entering a selected metro.
-- A weak result or a population baseline win is still a valid finding when honestly evaluated and explained.
-
-## 8. Reproducibility and repository layout
-
-The following is a **planned structure**, not a claim that these files already exist:
-
-```text
-.
-├── README.md                  project specification and run instructions
-├── AGENT.md                   staged instructions and safeguards for coding agent
-├── SOURCES.md                 exact public datasets, URLs, release dates, access dates
-├── REPORT.md                  internal results and limitations (optional for submission)
-├── PROJECT_JOURNEY.md         decisions, pivots, experiments, failures (internal)
-├── requirements.txt           pinned Python dependencies
-├── run_all.py                 one entry point reproducing principal slide results
-├── data/
-│   ├── raw/                   untouched source extracts
-│   └── processed/             documented metro-level dataset
-├── src/
-│   ├── fetch_data.py
-│   ├── build_dataset.py
-│   ├── models.py
-│   ├── evaluate.py
-│   └── compare.py
-├── tests/                     data integrity and evaluation tests
-├── outputs/
-│   ├── feasibility.md
-│   ├── figures/
-│   └── tables/
-└── app/                       optional Streamlit app, only if time remains
-```
-
-### Planned execution (after implementation)
-
-```bash
+```powershell
 python -m venv .venv
-# Linux/macOS: source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-
-# Optional, only if required by the selected Census API endpoints:
-# export CENSUS_API_KEY="..."                 # Linux/macOS
-# $env:CENSUS_API_KEY="..."                  # PowerShell
-
-python run_all.py
-# If implemented: python run_all.py --skip-download
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-The agent must make the final commands match the actual implementation, test them in a clean environment where possible, and ensure `run_all.py` reproduces the tables/figures used in the presentation. Never commit keys, credentials or unnecessary large files.
+The pinned requirements cover data processing, modeling, plotting, and tests. The raw source payloads are not stored in Git; `python -m src.fetch_data` retrieves and validates them from the official sources. A clean reproduction therefore needs network access to those Census/OMB endpoints.
 
-## 9. Required deliverables and presentation
+## Environment and execution
 
-- [ ] Public-source dataset with observation definition, data dictionary and missingness notes.
-- [ ] Python script reproducing the **principal** presentation results.
-- [ ] Brief tested run instructions and exact data sources.
-- [ ] Presentation (12 minutes + 6 minutes Q&A): decision and K, candidate set, data and outcome, three methods, **two approach shortlists**, baseline comparison, evidence, why rankings differ, limitations; every member participates.
+The validated local interpreter is Python 3.11.9 with project dependencies already installed. On this machine the Windows Store Python executable is registered under the current user's Python 3.11 registry key but is absent from PATH. In PowerShell, if `python` is not recognized, locate the existing interpreter with:
 
-`REPORT.md`, `PROJECT_JOURNEY.md`, extended robustness, and Streamlit UI are **internal/optional** aids; the professor **does not require a written report or dashboard**. Prioritise valid evidence and the presentation over extras.
+```powershell
+$pythonExe = (Get-ItemProperty 'HKCU:\Software\Python\PythonCore\3.11\InstallPath').ExecutablePath
+& $pythonExe --version
+```
 
-## 10. Honest current status and next action
+No packages need to be reinstalled on the validated machine. To rerun the project from a normal environment where Python is on PATH:
 
-This document specifies a plan only. **No model results, downloads, API compatibility checks, or historical-release-date checks have been completed.** Next: follow `AGENT.md` **Phase 0 (environment) and Phase 1 (feasibility)**, review the findings with the user, then implement the smallest defensible end-to-end pipeline.
+```powershell
+python -m pytest -q
+python -m src.fetch_data
+python -m src.build_dataset
+python run_all.py --train-cutoff 2010-01-01 --evaluation-cutoff 2018-02-01
+python reports/verify_reports.py
+python -m compileall -q src run_all.py tests
+```
 
-## 14. Autonomous execution and data/security requirements
+The downloader validates cached files and records source URL, HTTP status, size, SHA-256, retrieval time, and local validation status in `data/raw/download_manifest.csv`. It does not extract archives. Keep the raw downloads unchanged. The analysis tables are generated under `outputs/tables/`, figures under `outputs/figures/`, processed data under `data/processed/`, and dataset checks in `outputs/dataset_qa.json`.
 
-**The coding agent owns the end-to-end execution.** The user should not be expected to manually locate, download, clean, merge, or upload datasets. The agent must independently research official public sources, fetch the required files or API extracts, validate them, build the dataset, implement the methods, run the evaluation, and prepare reproducible outputs. Do not ask the user to perform routine project work.
+## Project map
 
-If a source requires a free API key or account credential, first determine whether the same public data can be obtained without one. Prefer unauthenticated official downloads where practical. If a key is genuinely required, explain the exact blocker and offer a secure local configuration path; never ask the user to paste a secret into chat, a source file, a notebook, a log, or a Git commit.
+- `REPORT.md`: results and decision interpretation.
+- `CURRENT_PLAN.md`: approved timing and business design.
+- `SOURCES.md`: official provenance and source facts.
+- `outputs/feasibility.md`: current `PASS_WITH_LIMITATIONS` evidence gate.
+- `data/raw/download_manifest.csv`: verified source file inventory and hashes.
+- `data/processed/metro_panel.csv`: analytical panel.
+- `outputs/tables/`: candidate list, complete rankings, shortlists, metrics, definitions, and explanations.
+- `outputs/figures/`: generated evaluation figures.
+- `reports/README.md`: index to the authoritative report, feasibility evidence, result tables, figures, and review images.
+- `reports/screenshots/`: high-resolution PNG copies of the actual generated result visualizations. The interactive HTML dashboard was not available to the UI screenshot connector during this audit.
+- `presentation_assets/`: self-contained HTML dashboard, four 240-DPI presentation PNGs, a reproducible builder, and a concise result summary.
+- `dist/Restaurant_Market_Expansion_Submission_Presentation_2026-11-26.zip`: latest verified archive, including the presentation assets.
+- `dist/Restaurant_Market_Expansion_Submission.zip` and `dist/Restaurant_Market_Expansion_Submission_Audited_2026-11-26.zip`: earlier preserved packages.
+- `IMPLEMENTATION_STATUS.md` and `PROJECT_JOURNEY.md`: execution evidence and chronological record.
+- `FINAL_AUDIT.md`: pre-submission quality audit, command results, limitations, and Git-review outcome.
+- `README_ORIGINAL.md`: preserved original proposal; the approved design is in `CURRENT_PLAN.md`.
+- `README_MLB_PROJECT_SETUP.md`: the original README from the remote repository's initial setup commit, retained because that commit is labeled for an MLB project.
 
-### Local-first data handling
+## Presentation assets
 
-- Run the agent, models, data processing and analysis locally. Do not send project datasets, source extracts, prompts containing local data, credentials, or generated results to third-party cloud model APIs or external services.
-- Internet access may be used **only to retrieve public source material and verify documentation/licensing**. Keep network activity limited to the official sources and endpoints needed for this project.
-- A local Ollama model does not by itself guarantee system security. Treat the agent as software with potentially broad filesystem and shell access; restrict it to the project workspace where possible and require explicit confirmation before destructive or out-of-scope operations.
-- Use public, non-sensitive data only. Do not collect personal data or attempt to identify individuals.
+Open `presentation_assets/dashboard.html` in a browser for the static, self-contained dashboard. To regenerate its graphics and summary from the verified ranking CSVs, run:
 
-### Data integrity and security
+```powershell
+python -B presentation_assets/build_presentation_assets.py
+```
 
-- Verify HTTPS and official source domains before downloading. Record source URLs, retrieval timestamps, licences/terms, query parameters, file sizes and SHA-256 checksums where practical.
-- Treat downloaded files as untrusted input. Do not execute scripts, macros, binaries or installers found inside downloaded archives. Inspect archive contents before extraction and reject path traversal, unexpected executable files and suspiciously large payloads.
-- Preserve raw downloads unchanged in `data/raw/`; write transformations to `data/interim/` or `data/processed/`. Never overwrite the only copy of a source file.
-- Validate file types, schemas, row counts, geographic identifiers, year fields, code values, duplicates, missingness and suppression markers before using data.
-- Keep credentials out of code and version control. Use environment variables or an ignored local configuration file; provide a safe `.env.example` with placeholders only. Redact secrets from logs and reports.
-- Do not upload local files or datasets to external websites, paste services, public repositories or cloud storage.
-- Maintain a data lineage record connecting every derived feature and target to its original source, reference period, release date, transformation and validation checks.
+The visual assets compare the three top-five lists, metrics at K=5/10/20, the white-space score against later observed additions, and the methodology limits. Browser screenshot capture was unavailable during the final audit; the deliverables are the actual chart PNGs generated from the project outputs.
 
-### Leakage and evaluation security
+## Integrity notes
 
-The agent is responsible for preventing **temporal leakage, target leakage and evaluation contamination**. For every feature, it must verify when the information was publicly available, not merely the year the data describes. It must also ensure that test-period outcomes never influence candidate selection, feature engineering, preprocessing, model selection, hyperparameter tuning, threshold choices or narrative conclusions. Any leakage risk must be documented and resolved before results are reported.
+The CBP outcome is establishment net additions across the industry. It does not measure a specific chain's performance, profit, survival, or causal return on entry. The post-2017 CBP disclosure rule means absent small cells are unknown, not zero. The project checks that both evaluation endpoint rows exist for all selected candidates. Official raw payloads are reproducibly downloaded from the sources documented in `SOURCES.md`; raw files and distributable ZIP archives are excluded from Git, while the manifest, analytical panel, QA, tables, figures, and documentation are included.
 
-The agent must run automated assertions that:
-1. every feature's availability date is on or before its simulated decision cutoff;
-2. every target period begins after that cutoff;
-3. training and evaluation observations are separated as specified;
-4. preprocessing and tuning are fitted using training data only;
-5. the same candidate universe and target definition are used by all ranking methods.
+## Reports and independent review
 
-If these checks cannot be established from evidence, mark the analysis blocked or revise the historical design transparently before modelling. Never conceal the uncertainty.
+`REPORT.md` is the authoritative final project report. `reports/README.md` maps it to the approved methodology, feasibility evidence, generated tables, and figures. The GitHub repository is [punitgauttam/Restaurant-Market-Expansion-ML](https://github.com/punitgauttam/Restaurant-Market-Expansion-ML), on branch `main`. Follow the reproducibility commands above from a clean clone. A clone requires network access to download official raw source files before rebuilding the dataset.

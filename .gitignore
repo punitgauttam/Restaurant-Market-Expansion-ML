@@ -1,11 +1,41 @@
+# Python-generated files and local environments
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-.env
-.env.*
-!.env.example
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Local secrets and editor/OS files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
 .DS_Store
+Thumbs.db
+
+# Downloaded raw source payloads remain local; keep provenance manifest
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/download_manifest.csv
+
+# Include the verified analytical panel and supporting processed metadata
+data/processed/*
+!data/processed/.gitkeep
+!data/processed/metro_panel.csv
+!data/processed/feature_metadata.csv
+!data/processed/feature_metadata_template.csv
+!data/processed/data_dictionary.csv
+!data/processed/omb_2017_msa_county_crosswalk.csv
+
+# Include generated tables and figures
+outputs/tables/*
+!outputs/tables/.gitkeep
+!outputs/tables/*.csv
+outputs/figures/*
+!outputs/figures/*.png
+
+# Submission archives are distributed separately
+dist/

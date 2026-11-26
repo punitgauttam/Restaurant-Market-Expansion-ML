@@ -1,0 +1,21 @@
+metro_id,metro_name,method,score,rank,net_additions
+33100,"Miami-Fort Lauderdale-West Palm Beach, FL",white_space,449.61986273142065,1,92.0
+45300,"Tampa-St. Petersburg-Clearwater, FL",white_space,433.0714017747623,2,138.0
+26420,"Houston-The Woodlands-Sugar Land, TX",white_space,336.6083117929438,3,243.0
+38060,"Phoenix-Mesa-Scottsdale, AZ",white_space,305.9271528600857,4,193.0
+40140,"Riverside-San Bernardino-Ontario, CA",white_space,294.3585403322022,5,172.0
+32580,"McAllen-Edinburg-Mission, TX",white_space,232.8231815746767,6,23.0
+35840,"North Port-Sarasota-Bradenton, FL",white_space,191.48540409796271,7,54.0
+29460,"Lakeland-Winter Haven, FL",white_space,189.14498628898434,8,63.0
+33460,"Minneapolis-St. Paul-Bloomington, MN-WI",white_space,185.8363467207637,9,-39.0
+36740,"Orlando-Kissimmee-Sanford, FL",white_space,153.2670255346584,10,142.0
+15980,"Cape Coral-Fort Myers, FL",white_space,150.72763873553788,11,37.0
+33340,"Milwaukee-Waukesha-West Allis, WI",white_space,144.76967064376686,12,31.0
+19660,"Deltona-Daytona Beach-Ormond Beach, FL",white_space,140.57811088336365,13,24.0
+41700,"San Antonio-New Braunfels, TX",white_space,138.85392756364263,14,121.0
+38900,"Portland-Vancouver-Hillsboro, OR-WA",white_space,130.49244422254492,15,-60.0
+24340,"Grand Rapids-Wyoming, MI",white_space,129.2969155522402,16,20.0
+28140,"Kansas City, MO-KS",white_space,102.04124295021711,17,-23.0
+25540,"Hartford-West Hartford-East Hartford, CT",white_space,98.671488920726,18,66.0
+46060,"Tucson, AZ",white_space,88.98357114817202,19,-2.0
+23420,"Fresno, CA",white_space,86.77136832656072,20,64.0
