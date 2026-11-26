@@ -93,3 +93,9 @@ Only after the complete data QA report and `outputs/feasibility.md` justify PASS
 - Refreshed presentation-inclusive archive contains 84 members, passes ZIP integrity, and has all member hashes matching the workspace; kept out of the GitHub staging set.
 - Verified 69 eligible local files copied byte-for-byte into the temporary clone for review. Commit/push status is recorded after that phase completes.
 - Clean-clone dependency installation identified the yanked Matplotlib 3.9.1 Windows release. The pin is updated to 3.9.1.post1 (a compatible Windows x64 wheel was verified); this fixes packaging only. Final post-fix clean-clone test/build status is recorded after rerunning it.
+
+## Independent clean-clone verification - 2026-11-26
+- Environment: Windows PowerShell 5.1 attached to the user's local workspace; Python 3.11.9 is installed in the Store package but off PATH, and sandbox restrictions block direct execution. The authorized elevated route ran the installed interpreter. The workspace folder has no `.git` metadata; the exact user-provided GitHub remote was cloned to a disposable temp directory to preserve existing history.
+- Final implementation commit under independent verification: `3636a4af6fe7b8aff3dfc34e6a4f885ef25a7b52`. Requirements installed successfully in a clean Python 3.11.9 venv. `matplotlib` is pinned to 3.9.1.post1 for its compatible Windows wheel; analysis behavior is unchanged.
+- Clean clone fetched/validated 13/13 official sources; full build passed with 383 training MSAs, 100 evaluation MSAs and 1,169 county/MSA links; approved model pipeline completed (alpha=1.0).
+- Verification: pytest **37 passed**, compileall passed, report audit passed (9/9 metrics, 15/15 top-five values, 2 report figures, 4/4 chart matches). Top-five observed outcomes: +838 white-space; -8 population; -8 Ridge.
